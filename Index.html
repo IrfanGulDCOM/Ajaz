@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Record Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Base Styles - Optimized for Readability/Touch */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; /* Remove default margin */
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h2 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Controls - Larger for easy tapping */
+        input, select {
+            padding: 12px; /* Increased padding */
+            margin: 10px 0; /* Vertical spacing */
+            width: 100%; /* Full width for better flow */
+            box-sizing: border-box; /* Include padding/border in width */
+            border: 1px solid #ccc;
+            border-radius: 8px; /* Slightly more rounded corners */
+            font-size: 16px; /* Larger text for mobile readability */
+        }
+
+        /* Buttons - Larger and full width for mobile */
+        button, .link-btn {
+            padding: 15px 16px; /* Increased padding for better touch area */
+            margin: 10px 0;
+            width: 100%; /* Full width */
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            text-decoration: none;
+            display: block; /* Ensure link-btn acts like a block-level button */
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background: #0b57d0;
+        }
+
+        .link-btn {
+            background: #34a853;
+        }
+
+        .link-btn:hover {
+            background: #2a8a44;
+        }
+        
+        #result {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* Media Query for larger screens (e.g., tablets and desktops) */
+        @media (min-width: 600px) {
+            body {
+                max-width: 400px; /* Constrain width on desktop/tablet */
+                margin: 20px auto; /* Center the form */
+                padding: 30px;
+                border: 1px solid #eee;
+                border-radius: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            input, select, button, .link-btn {
+                width: 100%; /* Still use full width of the constrained container */
+            }
+            
+            /* Put buttons side-by-side on larger screens if desired
+            button, .link-btn {
+                width: 48%; 
+                display: inline-block;
+                margin-right: 2%; 
+            }
+            */
+        }
+    </style>
+</head>
+<body>
+    <h2>💰 Expense Entry Form</h2>
+
+    <form id="expenseForm">
+        <input type="date" id="date" required><br>
+        <input type="text" id="item" placeholder="Item Description" required><br>
+        <input type="number" id="amount" placeholder="Amount (e.g., 49.99)" required><br>
+        <select id="type" required>
+            <option value="">Select Payment Type</option>
+            <option value="Cash">Cash</option>
+            <option value="mPay">mPay</option>
+            <option value="Credit">Credit</option>
+            <option value="UPI">UPI</option>
+            <option value="Other">Other</option>
+        </select><br>
+
+        <button type="button" onclick="submitData()">➕ Add Record</button>
+        <a href="view.html" class="link-btn">🧾 Go to Records Page</a>
+    </form>
+
+    <p id="result"></p>
+
+    <script>
+        // Your existing JavaScript remains the same, but for completeness:
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwJkYZ2z8SXXsBV96LgtIcXy5I1lR2wJtaKRlz1hWfg9by9tFFA-uPeKg2YwvsuKG2t/exec";
+
+        async function submitData() {
+            const form = document.getElementById("expenseForm");
+            const data = {
+                action: "add",
+                sno: "", // leave blank - auto-generated in sheet
+                date: document.getElementById("date").value,
+                item: document.getElementById("item").value.trim(),
+                amount: document.getElementById("amount").value.trim(),
+                type: document.getElementById("type").value
+            };
+
+            if (!data.date || !data.item || !data.amount || !data.type) {
+                document.getElementById("result").innerText = "⚠️ Please fill all fields.";
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                for (let key in data) formData.append(key, data[key]);
+
+                const res = await fetch(scriptURL, { method: "POST", body: formData });
+                const text = await res.text();
+                document.getElementById("result").innerText = text;
+
+                form.reset();
+            } catch (error) {
+                document.getElementById("result").innerText = "❌ Error: Unable to connect to server.";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

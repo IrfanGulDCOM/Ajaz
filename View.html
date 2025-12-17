@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Expense Records</title>
+  <style>
+    /* Reset and Mobile-First Base (as before) */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h2 { 
+      color: #0d47a1;
+      margin-top: 0;
+      text-align: center;
+    }
+    
+    /* Summary Boxes Layout */
+    .summary-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      justify-content: center;
+      /* Default: Side-by-side on larger screens */
+    }
+
+    .total-box {
+      flex: 1 1 200px; 
+      padding: 15px;
+      font-size: 1.1em; /* Default font size */
+      font-weight: bold;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      /* Ensure text doesn't overflow */
+      overflow-wrap: break-word; 
+    }
+    .total-box.grand {
+      background: #e3f2fd;
+      color: #0d47a1;
+      border: 1px solid #bbdefb;
+    }
+    .total-box.credit {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    /* Form/Search Controls - Optimized for flexibility (as before) */
+    .controls-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 150px;
+      min-width: 150px; 
+    }
+    
+    /* Inputs, Selects, and Labels (as before) */
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    input[type="date"], select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      appearance: none; 
+    }
+
+    /* Buttons (as before) */
+    button, .link-btn {
+      padding: 12px 20px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.3s ease;
+      flex: 1 1 auto;
+    }
+    button { background: #1a73e8; color: white; }
+    button:hover { background: #0b57d0; }
+    .link-btn { background: #34a853; color: white; max-width: 200px; }
+    .link-btn:hover { background: #2a8a44; }
+    
+    /* Table Styles (as before) */
+    #result { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse; min-width: 600px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px;
+    }
+    th, td {
+      border: 1px solid #e0e0e0; padding: 10px; text-align: left; font-size: 14px; white-space: nowrap;
+    }
+    th {
+      background: #bbdefb; color: #1a73e8; font-weight: bold;
+    }
+    tr:nth-child(even) { background: #f9f9f9; }
+    
+    /* === MOBILE OPTIMIZATION (max-width: 600px) === */
+    @media (max-width: 600px) {
+      /* Force Summary Boxes to Stack and reduce their size */
+      .summary-container {
+        flex-direction: column; /* Crucial: forces vertical stacking */
+        gap: 8px; /* Slightly smaller gap when stacked */
+      }
+      .total-box {
+        font-size: 1em; /* Slightly smaller text for better fit */
+        padding: 10px;
+        flex-basis: auto; /* Take full width when stacked */
+      }
+
+      /* Controls (as before - stack vertically) */
+      .controls-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-group {
+        flex: 1 1 100%;
+      }
+      button, .link-btn {
+        margin: 5px 0;
+        width: 100%;
+        max-width: none;
+      }
+    }
+
+  </style>
+</head>
+<body onload="populateMonthDropdown()">
+  <h2>View Expense Records</h2>
+
+  <div class="summary-container">
+    <div class="total-box grand" id="totalGrand"></div>
+    <div class="total-box credit" id="totalCredit"></div>
+  </div>
+
+  <div class="controls-container">
+    <div class="control-group">
+      <label for="fromDate">From Date:</label>
+      <input type="date" id="fromDate">
+    </div>
+    <div class="control-group">
+      <label for="toDate">To Date:</label>
+      <input type="date" id="toDate">
+    </div>
+    <div class="control-group">
+      <label for="monthSelect">OR Select Month:</label>
+      <select id="monthSelect" onchange="clearDateInputs()">
+        <option value="">-- Select Month --</option>
+        </select>
+    </div>
+    <button onclick="searchData()">Search</button>
+    <a href="index.html" class="link-btn">Back to Entry Form</a>
+  </div>
+
+  <div id="result"></div>
+
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzYRH28onkco5yZ1o3DQv36sN-RpLfrOQ91wBGjbFnMp6CWJfj-fSMWyxPH0F9X5cBY/exec";
+
+    // --- Helper Functions ---
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function formatDateToDDMonYYYY(date) {
+        if (!(date instanceof Date) || isNaN(date)) return '';
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day}-${month}-${year}`;
+    }
+
+    function clearTotals() {
+      document.getElementById("totalGrand").innerHTML = "💰 Grand Total: ₹ 0.00";
+      document.getElementById("totalCredit").innerHTML = "🟢 Credit Total: ₹ 0.00";
+    }
+
+    function clearDateInputs() {
+      // If month is selected, clear date range inputs
+      if (document.getElementById("monthSelect").value) {
+        document.getElementById("fromDate").value = "";
+        document.getElementById("toDate").value = "";
+      }
+    }
+
+    function populateMonthDropdown() {
+      const select = document.getElementById("monthSelect");
+      const startYear = 2025;
+      const endYear = 2026;
+
+      for (let year = startYear; year <= endYear; year++) {
+          for (let i = 0; i < 12; i++) {
+            const monthStr = monthNames[i];
+            
+            // Value format: YYYY-MM (e.g., 2025-12)
+            const monthValue = `${year}-${String(i + 1).padStart(2, '0')}`;
+            
+            const option = document.createElement("option");
+            option.value = monthValue;
+            option.textContent = `${monthStr} ${year}`;
+            select.appendChild(option);
+          }
+      }
+      clearTotals(); // Initialize totals
+    }
+    // --- End Helper Functions ---
+
+
+    async function searchData() {
+      const fromDateInput = document.getElementById("fromDate");
+      const toDateInput = document.getElementById("toDate");
+      const monthSelect = document.getElementById("monthSelect");
+      const resultDiv = document.getElementById("result");
+      
+      let fromDate = fromDateInput.value;
+      let toDate = toDateInput.value;
+      let selectedMonth = monthSelect.value;
+      
+      clearTotals(); // Reset totals before search
+      resultDiv.innerHTML = "";
+      
+      let apiUrl = `${scriptURL}?`;
+
+      // --- Determine Search Mode ---
+      if (fromDate && toDate) {
+        // Mode 1: Date Range Search
+        apiUrl += `fromDate=${fromDate}&toDate=${toDate}`;
+        
+      } else if (selectedMonth) {
+        // Mode 2: Month Search
+        const [year, month] = selectedMonth.split('-');
+        
+        // Get the last day of the selected month
+        const lastDay = new Date(year, month, 0).getDate(); 
+        
+        // Set new start/end dates for the API call
+        fromDate = `${selectedMonth}-01`;
+        toDate = `${selectedMonth}-${lastDay}`;
+        
+        apiUrl += `fromDate=${fromDate}&toDate=${toDate}`;
+        
+      } else {
+        // Mode 3: No Selection
+        resultDiv.innerHTML = "<p style='color:red; text-align:center;'>⚠️ Please select a **Date Range** OR a **Month**.</p>";
+        return;
+      }
+      
+      // Clear the other search controls after successful determination
+      if (selectedMonth) {
+          fromDateInput.value = "";
+          toDateInput.value = "";
+      } else if (fromDate) {
+          monthSelect.value = "";
+      }
+      
+      // --- Fetch Data ---
+      try {
+        resultDiv.innerHTML = "<p style='text-align:center;'>🔍 Loading records...</p>";
+        const res = await fetch(apiUrl);
+        
+        if (!res.ok) {
+           throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          resultDiv.innerHTML = "<p style='text-align:center;'>No records found for the selected criteria.</p>";
+          return;
+        }
+
+        let grandTotal = 0;
+        let creditTotal = 0;
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Amount</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach(r => {
+          // Process date string received from the Google Script
+          const rawDate = r[1] ? new Date(r[1]) : null;
+          const formattedDate = formatDateToDDMonYYYY(rawDate); 
+          
+          const amount = parseFloat(r[3]) || 0;
+          const type = r[4] ? r[4].toUpperCase().trim() : '';
+
+          // Calculations
+          grandTotal += amount;
+          if (type === 'CREDIT') {
+              creditTotal += amount;
+          }
+
+          html += `
+            <tr>
+              <td>${r[0] || ""}</td>
+              <td>${formattedDate}</td>
+              <td>${r[2] || ""}</td>
+              <td>${amount.toFixed(2)}</td>
+              <td>${r[4] || ""}</td>
+            </tr>
+          `;
+        });
+
+        html += "</tbody></table>";
+        resultDiv.innerHTML = html;
+
+        // Display updated totals
+        document.getElementById("totalGrand").innerHTML = `💰 Grand Total: ₹ ${grandTotal.toFixed(2)}`;
+        document.getElementById("totalCredit").innerHTML = `🟢 Credit Total: ₹ ${creditTotal.toFixed(2)}`;
+
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        resultDiv.innerHTML = `<p style='color:red; text-align:center;'>❌ Error retrieving data: ${err.message || "Please check the script URL."}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
