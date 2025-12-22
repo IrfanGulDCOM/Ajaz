@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Expense Records</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    h2 {
+      color: #0d47a1;
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .summary-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .total-box {
+      flex: 1 1 200px;
+      padding: 15px;
+      font-size: 1.1em;
+      font-weight: bold;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .total-box.grand {
+      background: #e3f2fd;
+      color: #0d47a1;
+      border: 1px solid #bbdefb;
+    }
+
+    .total-box.credit {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #a5d6a7;
+    }
+
+    .controls-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 150px;
+      min-width: 150px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input[type="date"], select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .btn-search { background:#1a73e8; }
+    .btn-search:hover { background:#0b57d0; }
+
+    .btn-pdf { background:#d93025; }
+    .btn-pdf:hover { background:#b71c1c; }
+
+    #result { overflow-x:auto; }
+
+    table {
+      width:100%;
+      border-collapse: collapse;
+      background: white;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border:1px solid #ddd;
+      padding:10px;
+      font-size:14px;
+      text-align:left;
+      white-space:nowrap;
+    }
+
+    th {
+      background:#bbdefb;
+      color:#1a73e8;
+    }
+
+    tr:nth-child(even) { background:#f9f9f9; }
+
+    @media (max-width:600px) {
+      .summary-container { flex-direction:column; }
+      .controls-container { flex-direction:column; }
+      button { width:100%; }
+    }
+  </style>
+</head>
+
+<body onload="populateMonthDropdown()">
+
+<h2>View Expense Records</h2>
+
+<div class="summary-container">
+  <div class="total-box grand" id="totalGrand">💰 Grand Total: ₹ 0.00</div>
+  <div class="total-box credit" id="totalCredit">🟢 Credit Total: ₹ 0.00</div>
+</div>
+
+<div class="controls-container">
+  <div class="control-group">
+    <label>From Date</label>
+    <input type="date" id="fromDate">
+  </div>
+
+  <div class="control-group">
+    <label>To Date</label>
+    <input type="date" id="toDate">
+  </div>
+
+  <div class="control-group">
+    <label>OR Select Month</label>
+    <select id="monthSelect" onchange="clearDateInputs()">
+      <option value="">-- Select Month --</option>
+    </select>
+  </div>
+
+  <button class="btn-search" onclick="searchData()">Search</button>
+  <button class="btn-pdf" onclick="savePDF()">Save PDF</button>
+</div>
+
+<div id="result"></div>
+
+<!-- html2pdf library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbzYRH28onkco5yZ1o3DQv36sN-RpLfrOQ91wBGjbFnMp6CWJfj-fSMWyxPH0F9X5cBY/exec";
+
+const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function populateMonthDropdown() {
+  const sel = document.getElementById("monthSelect");
+  for(let y=2025;y<=2026;y++){
+    for(let m=0;m<12;m++){
+      const opt = document.createElement("option");
+      opt.value = `${y}-${String(m+1).padStart(2,'0')}`;
+      opt.text = `${monthNames[m]} ${y}`;
+      sel.appendChild(opt);
+    }
+  }
+}
+
+function clearDateInputs(){
+  if(document.getElementById("monthSelect").value){
+    fromDate.value="";
+    toDate.value="";
+  }
+}
+
+function formatDate(d){
+  if(!d) return "";
+  d = new Date(d);
+  return `${String(d.getDate()).padStart(2,'0')}-${monthNames[d.getMonth()]}-${d.getFullYear()}`;
+}
+
+async function searchData(){
+  let from = fromDate.value;
+  let to = toDate.value;
+  let month = monthSelect.value;
+  let url = scriptURL+"?";
+
+  if(from && to){
+    url += `fromDate=${from}&toDate=${to}`;
+    monthSelect.value="";
+  }
+  else if(month){
+    let [y,m]=month.split("-");
+    let last = new Date(y,m,0).getDate();
+    url += `fromDate=${month}-01&toDate=${month}-${last}`;
+    fromDate.value=""; toDate.value="";
+  }
+  else{
+    alert("Select Date Range or Month");
+    return;
+  }
+
+  result.innerHTML="Loading...";
+  const res = await fetch(url);
+  const data = await res.json();
+
+  let gt=0, ct=0;
+  let html = `<table><tr>
+      <th>S.No</th><th>Date</th><th>Item</th><th>Amount</th><th>Type</th>
+    </tr>`;
+
+  data.forEach(r=>{
+    let amt=parseFloat(r[3])||0;
+    gt+=amt;
+    if((r[4]||"").toUpperCase()=="CREDIT") ct+=amt;
+
+    html+=`<tr>
+      <td>${r[0]||""}</td>
+      <td>${formatDate(r[1])}</td>
+      <td>${r[2]||""}</td>
+      <td>${amt.toFixed(2)}</td>
+      <td>${r[4]||""}</td>
+    </tr>`;
+  });
+
+  html+="</table>";
+  result.innerHTML=html;
+  totalGrand.innerText=`💰 Grand Total: ₹ ${gt.toFixed(2)}`;
+  totalCredit.innerText=`🟢 Credit Total: ₹ ${ct.toFixed(2)}`;
+}
+
+function savePDF(){
+  if(!result.innerHTML.trim()){
+    alert("Search data before saving PDF");
+    return;
+  }
+
+  const box=document.createElement("div");
+  box.style.padding="20px";
+  box.innerHTML=`
+    <h2 style="text-align:center;">Expense Report</h2>
+    <p><b>${totalGrand.innerText}</b></p>
+    <p><b>${totalCredit.innerText}</b></p>
+    ${result.innerHTML}
+  `;
+
+  html2pdf().from(box).set({
+    filename:`Expense_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+    margin:10,
+    html2canvas:{scale:2},
+    jsPDF:{unit:'mm',format:'a4'}
+  }).save();
+}
+</script>
+
+</body>
+</html>
