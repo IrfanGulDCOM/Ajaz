@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Hide Sidebar</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: -220px;
+  width: 260px;
+  height: 100%;
+  background: #1f2937;
+  color: #fff;
+  padding: 20px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+#sidebar.open {
+  left: 0;
+}
+
+#sidebar h2 {
+  margin-bottom: 20px;
+}
+
+#sidebar ul {
+  list-style: none;
+}
+
+#sidebar li {
+  padding: 12px 0;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+#sidebar li:hover {
+  opacity: 1;
+}
+
+/* Content */
+#content {
+  padding: 20px;
+  margin-left: 40px;
+}
+
+#toggleBtn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+/* Invisible hover trigger */
+#edgeTrigger {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 15px;
+  height: 100%;
+  z-index: 999;
+}
+</style>
+</head>
+
+<body>
+
+<div id="edgeTrigger"></div>
+
+<div id="sidebar">
+  <h2>Menu</h2>
+  <ul>
+    <li>🏠 Dashboard</li>
+    <li>👤 Profile</li>
+    <li>⚙️ Settings</li>
+    <li>🚪 Logout</li>
+  </ul>
+</div>
+
+<div id="content">
+  <button id="toggleBtn">☰</button>
+  <h1>Main Content</h1>
+  <p>Move your mouse to the left edge or click the menu button.</p>
+</div>
+
+<script>
+const sidebar = document.getElementById("sidebar");
+const edgeTrigger = document.getElementById("edgeTrigger");
+const toggleBtn = document.getElementById("toggleBtn");
+
+let pinned = false;
+
+// Open on hover
+edgeTrigger.addEventListener("mouseenter", () => {
+  if (!pinned) sidebar.classList.add("open");
+});
+
+// Close on mouse leave
+sidebar.addEventListener("mouseleave", () => {
+  if (!pinned) sidebar.classList.remove("open");
+});
+
+// Toggle button (mobile / pin)
+toggleBtn.addEventListener("click", () => {
+  pinned = !pinned;
+  sidebar.classList.toggle("open");
+});
+</script>
+
+</body>
+</html>
