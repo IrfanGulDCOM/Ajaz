@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Hide Sidebar</title>
+<title>Auto Hide Sidebar (No Click Close)</title>
 
 <style>
 * {
@@ -97,7 +97,11 @@ body {
 <div id="content">
   <button id="toggleBtn">☰</button>
   <h1>Main Content</h1>
-  <p>Hover left edge, click menu, or click anywhere to close.</p>
+  <p>
+    Sidebar opens on hover.<br>
+    Sidebar closes on mouse leave.<br>
+    Clicking page does NOT hide it.
+  </p>
 </div>
 
 <script>
@@ -107,31 +111,20 @@ const toggleBtn = document.getElementById("toggleBtn");
 
 let pinned = false;
 
-/* Open on hover */
+/* Hover to open */
 edgeTrigger.addEventListener("mouseenter", () => {
   if (!pinned) sidebar.classList.add("open");
 });
 
-/* Auto close on mouse leave */
+/* Auto hide on mouse leave */
 sidebar.addEventListener("mouseleave", () => {
   if (!pinned) sidebar.classList.remove("open");
 });
 
-/* Toggle / pin */
-toggleBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
+/* Toggle / Pin button */
+toggleBtn.addEventListener("click", () => {
   pinned = !pinned;
   sidebar.classList.toggle("open");
-});
-
-/* Prevent sidebar clicks from closing it */
-sidebar.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
-/* Click anywhere outside → close */
-document.addEventListener("click", () => {
-  if (!pinned) sidebar.classList.remove("open");
 });
 </script>
 
