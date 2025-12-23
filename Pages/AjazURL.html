@@ -26,7 +26,7 @@ body {
   width: 260px;
   height: 100%;
   background: #1f2937;
-  color: #fff;
+  color: white;
   padding: 20px;
   transition: left 0.3s ease;
   z-index: 1000;
@@ -97,7 +97,7 @@ body {
 <div id="content">
   <button id="toggleBtn">☰</button>
   <h1>Main Content</h1>
-  <p>Move your mouse to the left edge or click the menu button.</p>
+  <p>Hover left edge, click menu, or click anywhere to close.</p>
 </div>
 
 <script>
@@ -107,20 +107,31 @@ const toggleBtn = document.getElementById("toggleBtn");
 
 let pinned = false;
 
-// Open on hover
+/* Open on hover */
 edgeTrigger.addEventListener("mouseenter", () => {
   if (!pinned) sidebar.classList.add("open");
 });
 
-// Close on mouse leave
+/* Auto close on mouse leave */
 sidebar.addEventListener("mouseleave", () => {
   if (!pinned) sidebar.classList.remove("open");
 });
 
-// Toggle button (mobile / pin)
-toggleBtn.addEventListener("click", () => {
+/* Toggle / pin */
+toggleBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
   pinned = !pinned;
   sidebar.classList.toggle("open");
+});
+
+/* Prevent sidebar clicks from closing it */
+sidebar.addEventListener("click", (e) => {
+  e.stopPropagation();
+});
+
+/* Click anywhere outside → close */
+document.addEventListener("click", () => {
+  if (!pinned) sidebar.classList.remove("open");
 });
 </script>
 
