@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Hide Sidebar (No Click Close)</title>
+<title>Auto Hide Sidebar (Fixed)</title>
 
 <style>
 * {
@@ -36,6 +36,7 @@ body {
   left: 0;
 }
 
+/* Menu */
 #sidebar h2 {
   margin-bottom: 20px;
 }
@@ -68,12 +69,12 @@ body {
   margin-bottom: 20px;
 }
 
-/* Invisible hover trigger */
+/* Edge hover trigger */
 #edgeTrigger {
   position: fixed;
   top: 0;
   left: 0;
-  width: 15px;
+  width: 12px;
   height: 100%;
   z-index: 999;
 }
@@ -98,9 +99,9 @@ body {
   <button id="toggleBtn">☰</button>
   <h1>Main Content</h1>
   <p>
-    Sidebar opens on hover.<br>
-    Sidebar closes on mouse leave.<br>
-    Clicking page does NOT hide it.
+    ✔ Hover left edge → open<br>
+    ✔ Mouse leaves sidebar → auto hide<br>
+    ✔ Click button → pin
   </p>
 </div>
 
@@ -111,20 +112,32 @@ const toggleBtn = document.getElementById("toggleBtn");
 
 let pinned = false;
 
-/* Hover to open */
+/* Open sidebar */
+function openSidebar() {
+  sidebar.classList.add("open");
+  edgeTrigger.style.pointerEvents = "none"; // disable trigger
+}
+
+/* Close sidebar */
+function closeSidebar() {
+  sidebar.classList.remove("open");
+  edgeTrigger.style.pointerEvents = "auto"; // enable trigger
+}
+
+/* Hover edge */
 edgeTrigger.addEventListener("mouseenter", () => {
-  if (!pinned) sidebar.classList.add("open");
+  if (!pinned) openSidebar();
 });
 
-/* Auto hide on mouse leave */
+/* Auto hide */
 sidebar.addEventListener("mouseleave", () => {
-  if (!pinned) sidebar.classList.remove("open");
+  if (!pinned) closeSidebar();
 });
 
-/* Toggle / Pin button */
+/* Toggle pin */
 toggleBtn.addEventListener("click", () => {
   pinned = !pinned;
-  sidebar.classList.toggle("open");
+  pinned ? openSidebar() : closeSidebar();
 });
 </script>
 
