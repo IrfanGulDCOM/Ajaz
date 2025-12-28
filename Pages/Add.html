@@ -1,181 +1,210 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandi Management Dashboard</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GST HSN Rate Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* CSS Reset and Body Styling */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #FAFAFA; /* Off-White Background */
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        /* Header (Top Bar) */
-        header {
-            background-color: #333333; /* Dark Charcoal */
-            color: #FFFFFF;
-            padding: 15px 40px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-
-        /* Main Layout Container */
-        .main-container {
-            display: flex;
-            flex-grow: 1;
-        }
-
-        /* Sidebar (Navigation) */
-        .sidebar {
-            width: 250px;
-            background-color: #4CAF50; /* Primary Green */
-            color: #FFFFFF;
-            padding-top: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .menu-group {
-            padding: 0 15px;
-            margin-bottom: 25px;
-        }
-
-        .menu-group h2 {
-            font-size: 1.1em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #FFFFFF;
-            text-decoration: none;
-            padding: 10px 15px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .sidebar a:hover {
-            background-color: #66BB6A; /* Lighter Green on hover */
-            transform: translateX(3px); /* Subtle hover movement */
-        }
-        
-        /* Main Content Area */
-        .content {
-            flex-grow: 1; /* Takes up remaining space */
-            padding: 40px;
-        }
-
-        .content h2 {
-            color: #4CAF50;
-            border-bottom: 2px solid #FFB300; /* Secondary Orange accent */
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
-
-        /* Quick Stats Boxes */
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-box {
-            background-color: #FFFFFF;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #FFB300; /* Orange highlight */
-        }
-
-        .stat-box h3 {
-            margin-top: 0;
-            color: #333333;
-            font-size: 1em;
-            font-weight: 400;
-        }
-
-        .stat-box p {
-            font-size: 2em;
-            font-weight: bold;
-            color: #4CAF50;
-            margin: 5px 0 0;
-        }
+        :root { --primary: #2563eb; --secondary: #f8fafc; }
+        body { font-family: ui-sans-serif, system-ui; background: var(--secondary); }
+        .card { border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        @media (max-width: 640px) { .desktop-table { display: none; } .mobile-list { display: block; } }
+        @media (min-width: 641px) { .mobile-list { display: none; } .desktop-table { display: table; } }
     </style>
 </head>
-<body>
-    <header>
-        <h1>🍎 Mandi Management System</h1>
-    </header>
+<body class="p-3 sm:p-6">
 
-    <div class="main-container">
-        <aside class="sidebar">
-            <div class="menu-group">
-                <h2>Transactions</h2>
-                <a href="#">Challan Entry</a>
-                <a href="#">Sale Proceed</a>
-                <a href="#">Local Purchase</a>
-                <a href="#">Bijak Entry</a>
-                <a href="#">Sale/Disawer</a>
+<div class="max-w-5xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">GST HSN Tracker</h1>
+                    <p class="text-xs text-gray-500">Manage GST Rates & HSN Codes</p>
+                </div>
             </div>
-            <div class="menu-group">
-                <h2>Accounts & Reports</h2>
-                <a href="#">Grower Ledger</a>
-                <a href="#">Cust Ledger</a>
-                <a href="#">Grower Balance List</a>
-                <a href="#">Cust Balance List</a>
-            </div>
-            <div class="menu-group">
-                <h2>Books</h2>
-                <a href="#">Purchase Book</a>
-                <a href="#">Cash/Bank Book</a>
-                <a href="#">Disawer Register</a>
-            </div>
-        </aside>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition">+ Add HSN</button>
+        </div>
 
-        <main class="content">
-            <h2>Dashboard Overview</h2>
-            
-            <div class="quick-stats">
-                <div class="stat-box">
-                    <h3>Today's Total Sale</h3>
-                    <p>₹ 45,200</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Pending Challans</h3>
-                    <p>12</p>
-                </div>
-                <div class="stat-box">
-                    <h3>New Growers Today</h3>
-                    <p>3</p>
-                </div>
-                <div class="stat-box">
-                    <h3>Cash Balance</h3>
-                    <p>₹ 8,950</p>
-                </div>
-            </div>
-            
-            <h2 style="margin-top: 60px;">Quick Access</h2>
-            <p>Use the sidebar to navigate to transaction and report pages.</p>
-        </main>
+        <div class="mt-6">
+            <input type="text" id="searchInput" onkeyup="applySearch()" placeholder="Search HSN code or Description..." 
+                   class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div id="statusMessage" class="mt-4 text-sm text-center"></div>
+
+        <div class="mt-6 overflow-hidden border rounded-xl bg-gray-50">
+            <table class="desktop-table min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">HSN</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Description</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">GST Rate</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Cess%</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="dataBody" class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+            <div id="mobileList" class="mobile-list space-y-3 p-2"></div>
+            <div id="loadingIndicator" class="text-center p-8 text-blue-600 font-bold hidden">Processing...</div>
+        </div>
     </div>
+</div>
+
+<div id="dataModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <h2 id="modalTitle" class="text-xl font-bold mb-4">Add HSN Record</h2>
+        <form id="crudForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <input type="hidden" id="formUniqueId" name="uniqueId">
+            <input type="hidden" id="formAction" name="action">
+            
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">HSN Code</label>
+                <input type="text" id="formHsn" name="hsn" required class="w-full p-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
+                <textarea id="formDesc" name="description" required class="w-full p-2 border rounded-lg" rows="3"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">GST Rate (%)</label>
+                    <input type="number" step="0.01" id="formRate" name="gstRate" required class="w-full p-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Cess (%)</label>
+                    <input type="number" step="0.01" id="formCess" name="cess" required class="w-full p-2 border rounded-lg">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" onclick="closeModal()" class="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button id="submitButton" type="submit" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-bold">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYlKnLh15kVz8D0l10TzpPtjOvxcCjMiA4SfBC6HgHtndEHXTzmNyo3lh3GfrkIcUs/exec";
+
+let allRecords = [];
+
+async function loadData(force = false) {
+    const loader = document.getElementById('loadingIndicator');
+    loader.classList.remove('hidden');
+    try {
+        const fd = new FormData(); fd.set('action', 'read');
+        const resp = await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+        const res = await resp.json();
+        allRecords = res.data || [];
+        renderData(allRecords);
+    } catch (e) {
+        showStatus("Error loading data", "error");
+    } finally {
+        loader.classList.add('hidden');
+    }
+}
+
+function renderData(records) {
+    const tbody = document.getElementById('dataBody');
+    const mList = document.getElementById('mobileList');
+    tbody.innerHTML = ''; mList.innerHTML = '';
+
+    records.forEach(row => {
+        // Desktop
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="px-4 py-3 text-sm font-bold text-blue-700">${row.HSN}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">${row.Description}</td>
+            <td class="px-4 py-3 text-sm text-center font-bold">${row.GST_Rate}%</td>
+            <td class="px-4 py-3 text-sm text-center">${row.Cess}%</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="openModal('${row.HSN_Index}')" class="text-blue-600 mr-2 text-xs font-bold">Edit</button>
+                <button onclick="deleteRecord('${row.HSN_Index}')" class="text-red-600 text-xs font-bold">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Mobile
+        const div = document.createElement('div');
+        div.className = 'card p-4 border-l-4 border-blue-600';
+        div.innerHTML = `
+            <div class="flex justify-between font-bold text-blue-800"><span>HSN: ${row.HSN}</span><span>${row.GST_Rate}%</span></div>
+            <p class="text-sm text-gray-600 mt-1">${row.Description}</p>
+            <div class="flex justify-end gap-4 mt-3">
+                <button onclick="openModal('${row.HSN_Index}')" class="text-blue-600 text-sm">Edit</button>
+                <button onclick="deleteRecord('${row.HSN_Index}')" class="text-red-600 text-sm">Delete</button>
+            </div>
+        `;
+        mList.appendChild(div);
+    });
+}
+
+function applySearch() {
+    const val = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allRecords.filter(r => 
+        String(r.HSN).toLowerCase().includes(val) || 
+        String(r.Description).toLowerCase().includes(val)
+    );
+    renderData(filtered);
+}
+
+function openModal(index = null) {
+    const modal = document.getElementById('dataModal');
+    const form = document.getElementById('crudForm');
+    if (index) {
+        const row = allRecords.find(r => String(r.HSN_Index) === String(index));
+        document.getElementById('modalTitle').innerText = "Edit HSN";
+        document.getElementById('formUniqueId').value = index;
+        document.getElementById('formAction').value = "update";
+        document.getElementById('formHsn').value = row.HSN;
+        document.getElementById('formDesc').value = row.Description;
+        document.getElementById('formRate').value = row.GST_Rate;
+        document.getElementById('formCess').value = row.Cess;
+    } else {
+        form.reset();
+        document.getElementById('modalTitle').innerText = "Add New HSN";
+        document.getElementById('formAction').value = "create";
+    }
+    modal.classList.replace('hidden', 'flex');
+}
+
+function closeModal() { document.getElementById('dataModal').classList.replace('flex', 'hidden'); }
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    closeModal();
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    try {
+        await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+        loadData();
+    } catch (err) { alert("Action Failed"); }
+}
+
+async function deleteRecord(index) {
+    if(!confirm("Delete this HSN record?")) return;
+    const fd = new FormData();
+    fd.set('action', 'delete');
+    fd.set('uniqueId', index);
+    await fetch(SCRIPT_URL, { method: 'POST', body: fd });
+    loadData();
+}
+
+function showStatus(msg, type) { 
+    const s = document.getElementById('statusMessage');
+    s.innerText = msg;
+    s.className = `mt-4 text-sm text-center ${type === 'error' ? 'text-red-600' : 'text-green-600'}`;
+}
+
+window.onload = loadData;
+</script>
 </body>
 </html>
