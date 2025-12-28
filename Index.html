@@ -2,86 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>Login & Expense Entry</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f2f5f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  .login-box {
-    background: #ffffff;
-    padding: 25px;
-    width: 300px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  }
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  input {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  button {
-    width: 100%;
-    padding: 10px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #0056b3;
-  }
-  .msg {
-    text-align: center;
-    margin-top: 10px;
-    color: red;
-    font-size: 14px;
-  }
+/* ---------- COMMON ---------- */
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f5f9;
+  margin: 0;
+  padding: 20px;
+}
+.hidden { display: none; }
+
+/* ---------- LOGIN ---------- */
+.login-box {
+  max-width: 320px;
+  margin: 80px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+.login-box h2 {
+  text-align: center;
+}
+.login-box input, .login-box button {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+}
+.login-box button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.login-box button:hover { background: #0056b3; }
+#loginMsg {
+  text-align: center;
+  color: red;
+}
+
+/* ---------- EXPENSE FORM ---------- */
+.container {
+  max-width: 400px;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+h2 {
+  color: #1a73e8;
+  text-align: center;
+}
+input, select, button, .link-btn {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+button {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+button:hover { background: #0b57d0; }
+.link-btn {
+  background: #34a853;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+}
+.link-btn:hover { background: #2a8a44; }
+
+#result {
+  text-align: center;
+  font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
-<div class="login-box">
+<!-- ================= LOGIN SECTION ================= -->
+<div id="loginSection" class="login-box">
   <h2>Login</h2>
-
   <input type="text" id="userid" placeholder="User ID">
   <input type="password" id="password" placeholder="Password">
   <button onclick="checkLogin()">Login</button>
+  <div id="loginMsg"></div>
+</div>
 
-  <div class="msg" id="msg"></div>
+<!-- ================= EXPENSE SECTION ================= -->
+<div id="expenseSection" class="container hidden">
+  <h2>💰 Expense Entry Form</h2>
+
+  <form id="expenseForm">
+    <input type="date" id="date" required>
+    <input type="text" id="item" placeholder="Item Description" required>
+    <input type="number" id="amount" placeholder="Amount" required>
+
+    <select id="type" required>
+      <option value="">Select Payment Type</option>
+      <option value="Cash">Cash</option>
+      <option value="mPay">mPay</option>
+      <option value="Credit">Credit</option>
+      <option value="UPI">UPI</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <button type="button" onclick="submitData()">➕ Add Record</button>
+    <a href="Pages/View" class="link-btn">🧾 Go to Records Page</a>
+    <a href="Pages/AjazURL.html" class="link-btn">🧾 AjazURL</a>
+  </form>
+
+  <p id="result"></p>
 </div>
 
 <script>
-  /* ===== STORED CREDENTIALS (EDIT HERE) ===== */
-  const VALID_USER = "admin";
-  const VALID_PASS = "12345";
-  /* ========================================= */
+/* ===== LOGIN CREDENTIALS ===== */
+const VALID_USER = "admin";
+const VALID_PASS = "12345";
+/* ============================ */
 
-  function checkLogin() {
-    const uid = document.getElementById("userid").value;
-    const pwd = document.getElementById("password").value;
+function checkLogin() {
+  const uid = userid.value.trim();
+  const pwd = password.value.trim();
 
-    if (uid === VALID_USER && pwd === VALID_PASS) {
-      window.location.href = "https://irfanguldcom.github.io/Ajaz/Pages/Add.html";
-    } else {
-      document.getElementById("msg").innerText =
-        "❌ Invalid User ID or Password";
-    }
+  if (uid === VALID_USER && pwd === VALID_PASS) {
+    document.getElementById("loginSection").classList.add("hidden");
+    document.getElementById("expenseSection").classList.remove("hidden");
+  } else {
+    loginMsg.innerText = "❌ Invalid User ID or Password";
   }
+}
+
+/* ===== EXPENSE FORM SCRIPT ===== */
+const scriptURL =
+"https://script.google.com/macros/s/AKfycbwJkYZ2z8SXXsBV96LgtIcXy5I1lR2wJtaKRlz1hWfg9by9tFFA-uPeKg2YwvsuKG2t/exec";
+
+async function submitData() {
+  const data = {
+    action: "add",
+    sno: "",
+    date: date.value,
+    item: item.value.trim(),
+    amount: amount.value.trim(),
+    type: type.value
+  };
+
+  if (!data.date || !data.item || !data.amount || !data.type) {
+    result.innerText = "⚠️ Please fill all fields.";
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    for (let k in data) formData.append(k, data[k]);
+
+    const res = await fetch(scriptURL, { method: "POST", body: formData });
+    result.innerText = await res.text();
+    expenseForm.reset();
+  } catch {
+    result.innerText = "❌ Server connection failed.";
+  }
+}
 </script>
 
 </body>
