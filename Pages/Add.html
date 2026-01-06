@@ -1,210 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>GST HSN Rate Finder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root { --primary: #2563eb; --secondary: #f8fafc; }
-        body { font-family: ui-sans-serif, system-ui; background: var(--secondary); }
-        .card { border-radius: 12px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        @media (max-width: 640px) { .desktop-table { display: none; } .mobile-list { display: block; } }
-        @media (min-width: 641px) { .mobile-list { display: none; } .desktop-table { display: table; } }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Items Master</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#f1f5f9; font-family:Inter,system-ui,sans-serif; }
+.card { background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+label { font-weight:600; font-size:14px; color:#334155; }
+input, select { outline:none; }
+</style>
 </head>
-<body class="p-3 sm:p-6">
 
-<div class="max-w-5xl mx-auto">
-    <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-lg text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900">GST HSN Tracker</h1>
-                    <p class="text-xs text-gray-500">Manage GST Rates & HSN Codes</p>
-                </div>
-            </div>
-            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition">+ Add HSN</button>
-        </div>
+<body class="p-3 md:p-6">
 
-        <div class="mt-6">
-            <input type="text" id="searchInput" onkeyup="applySearch()" placeholder="Search HSN code or Description..." 
-                   class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
+<div class="max-w-7xl mx-auto card p-4 md:p-6">
 
-        <div id="statusMessage" class="mt-4 text-sm text-center"></div>
+<!-- HEADER -->
+<div class="flex flex-col md:flex-row gap-3 md:justify-between mb-6">
+  <input id="searchBox"
+    placeholder="Search Description"
+    onkeyup="applySearch()"
+    class="border px-4 py-2 rounded-xl w-full md:w-72">
 
-        <div class="mt-6 overflow-hidden border rounded-xl bg-gray-50">
-            <table class="desktop-table min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">HSN</th>
-                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">Description</th>
-                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">GST Rate</th>
-                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Cess%</th>
-                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="dataBody" class="bg-white divide-y divide-gray-200"></tbody>
-            </table>
-            <div id="mobileList" class="mobile-list space-y-3 p-2"></div>
-            <div id="loadingIndicator" class="text-center p-8 text-blue-600 font-bold hidden">Processing...</div>
-        </div>
-    </div>
+  <button onclick="openModal()"
+    class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold w-full md:w-auto">
+    + Add Item
+  </button>
 </div>
 
-<div id="dataModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-        <h2 id="modalTitle" class="text-xl font-bold mb-4">Add HSN Record</h2>
-        <form id="crudForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-            <input type="hidden" id="formUniqueId" name="uniqueId">
-            <input type="hidden" id="formAction" name="action">
-            
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">HSN Code</label>
-                <input type="text" id="formHsn" name="hsn" required class="w-full p-2 border rounded-lg">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Description</label>
-                <textarea id="formDesc" name="description" required class="w-full p-2 border rounded-lg" rows="3"></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">GST Rate (%)</label>
-                    <input type="number" step="0.01" id="formRate" name="gstRate" required class="w-full p-2 border rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Cess (%)</label>
-                    <input type="number" step="0.01" id="formCess" name="cess" required class="w-full p-2 border rounded-lg">
-                </div>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button type="button" onclick="closeModal()" class="flex-1 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
-                <button id="submitButton" type="submit" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-bold">Save</button>
-            </div>
-        </form>
-    </div>
+<!-- TABLE -->
+<div class="overflow-x-auto border rounded-xl">
+<table class="min-w-[900px] w-full text-sm">
+<thead class="bg-slate-100">
+<tr>
+  <th class="p-2">Description</th>
+  <th>HSN</th>
+  <th>Price</th>
+  <th>Pack</th>
+  <th>GST%</th>
+  <th>Stock</th>
+  <th>Type</th>
+  <th>ITC</th>
+  <th>Action</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+<div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6">
+
+<h2 id="modalTitle" class="text-xl font-bold mb-4">Add Item</h2>
+<input type="hidden" id="editCode">
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+<div>
+  <label>Description</label>
+  <input id="desc" class="w-full border p-3 rounded-lg">
+</div>
+
+<div>
+  <label>HSN Code</label>
+  <select id="hsn" class="w-full border p-3 rounded-lg" onchange="onHSNChange()">
+    <option value="">Select HSN</option>
+  </select>
+</div>
+
+<div>
+  <label>Unit Price</label>
+  <input id="price" type="number" class="w-full border p-3 rounded-lg">
+</div>
+
+<div>
+  <label>Unit Pack</label>
+  <input id="pack" class="w-full border p-3 rounded-lg">
+</div>
+
+<div>
+  <label>GST %</label>
+  <input id="gst" type="number" readonly
+         class="w-full border p-3 rounded-lg bg-slate-100">
+</div>
+
+<div>
+  <label>Inventory Qty</label>
+  <input id="qty" type="number" class="w-full border p-3 rounded-lg">
+</div>
+
+<div>
+  <label>Goods / Services</label>
+  <select id="gos" class="w-full border p-3 rounded-lg">
+    <option value="Goods">Goods</option>
+    <option value="Services">Services</option>
+  </select>
+</div>
+
+<div>
+  <label>ITC Eligible</label>
+  <select id="itc" class="w-full border p-3 rounded-lg">
+    <option value="No">No</option>
+    <option value="Yes">Yes</option>
+  </select>
+</div>
+
+</div>
+
+<div class="flex justify-end gap-3 mt-6">
+  <button onclick="closeModal()" class="px-6 py-3 border rounded-xl">
+    Cancel
+  </button>
+  <button onclick="save()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">
+    Save
+  </button>
+</div>
+
+</div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYlKnLh15kVz8D0l10TzpPtjOvxcCjMiA4SfBC6HgHtndEHXTzmNyo3lh3GfrkIcUs/exec";
+/* ================= CONFIG ================= */
+const API_URL =
+'https://script.google.com/macros/s/AKfycbxJmkUyCK-R3IonDnmYQd48h1jh71XSzjWZV34DMysDoccgLk6b1-kvsZjrAhOSRtvk/exec';
 
-let allRecords = [];
+const HSN_API =
+'https://script.google.com/macros/s/AKfycbxllW6WXj7sJpoMChVyDOi46qwv_jSa8DQu3JeiAHcNATUZfMsOrJlCaHBVWqbKQMpR/exec';
 
-async function loadData(force = false) {
-    const loader = document.getElementById('loadingIndicator');
-    loader.classList.remove('hidden');
-    try {
-        const fd = new FormData(); fd.set('action', 'read');
-        const resp = await fetch(SCRIPT_URL, { method: 'POST', body: fd });
-        const res = await resp.json();
-        allRecords = res.data || [];
-        renderData(allRecords);
-    } catch (e) {
-        showStatus("Error loading data", "error");
-    } finally {
-        loader.classList.add('hidden');
-    }
+/* ================= STATE ================= */
+let ALL = [];
+let HSN_MAP = {};
+
+/* ================= API ================= */
+function api(action, payload = {}) {
+  return fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...payload })
+  }).then(r => r.json());
 }
 
-function renderData(records) {
-    const tbody = document.getElementById('dataBody');
-    const mList = document.getElementById('mobileList');
-    tbody.innerHTML = ''; mList.innerHTML = '';
+/* ================= LOADERS ================= */
+function loadHSN() {
+  fetch(HSN_API)
+    .then(r => r.json())
+    .then(data => {
+      if (!Array.isArray(data)) {
+        alert('HSN API error');
+        return;
+      }
 
-    records.forEach(row => {
-        // Desktop
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="px-4 py-3 text-sm font-bold text-blue-700">${row.HSN}</td>
-            <td class="px-4 py-3 text-sm text-gray-600">${row.Description}</td>
-            <td class="px-4 py-3 text-sm text-center font-bold">${row.GST_Rate}%</td>
-            <td class="px-4 py-3 text-sm text-center">${row.Cess}%</td>
-            <td class="px-4 py-3 text-center">
-                <button onclick="openModal('${row.HSN_Index}')" class="text-blue-600 mr-2 text-xs font-bold">Edit</button>
-                <button onclick="deleteRecord('${row.HSN_Index}')" class="text-red-600 text-xs font-bold">Delete</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
+      HSN_MAP = {};
+      hsn.innerHTML = '<option value="">Select HSN</option>';
 
-        // Mobile
-        const div = document.createElement('div');
-        div.className = 'card p-4 border-l-4 border-blue-600';
-        div.innerHTML = `
-            <div class="flex justify-between font-bold text-blue-800"><span>HSN: ${row.HSN}</span><span>${row.GST_Rate}%</span></div>
-            <p class="text-sm text-gray-600 mt-1">${row.Description}</p>
-            <div class="flex justify-end gap-4 mt-3">
-                <button onclick="openModal('${row.HSN_Index}')" class="text-blue-600 text-sm">Edit</button>
-                <button onclick="deleteRecord('${row.HSN_Index}')" class="text-red-600 text-sm">Delete</button>
-            </div>
-        `;
-        mList.appendChild(div);
+      data.forEach(r => {
+        HSN_MAP[r.HSN] = r.GST_Rate;
+        const opt = document.createElement('option');
+        opt.value = r.HSN;
+        opt.textContent = `${r.HSN} (${r.GST_Rate}%)`;
+        hsn.appendChild(opt);
+      });
+
+      console.log('HSN Loaded', HSN_MAP);
+    })
+    .catch(e => {
+      alert('HSN Load Failed');
+      console.error(e);
     });
 }
 
+function load() {
+  api('read').then(d => {
+    ALL = Array.isArray(d) ? d : [];
+    render(ALL);
+  });
+}
+
+/* ================= UI ================= */
+function render(data) {
+  rows.innerHTML = data.length ? data.map(r => `
+<tr class="border-t">
+<td class="p-2">${r.Description}</td>
+<td>${r.HSN}</td>
+<td>${r.UnitPrice}</td>
+<td>${r.Unit_Pack}</td>
+<td>${r.GST_Rate}</td>
+<td>${r.InventoryQty}</td>
+<td>${r.GoodsOrService}</td>
+<td>${r.ITC}</td>
+<td>
+  <button onclick='edit(${JSON.stringify(r)})' class="text-blue-600 font-bold">Edit</button>
+  <button onclick='del("${r.ItemCode}")' class="text-red-600 font-bold ml-2">Del</button>
+</td>
+</tr>`).join('')
+  : `<tr><td colspan="9" class="p-6 text-center text-slate-400">No records</td></tr>`;
+}
+
 function applySearch() {
-    const val = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allRecords.filter(r => 
-        String(r.HSN).toLowerCase().includes(val) || 
-        String(r.Description).toLowerCase().includes(val)
-    );
-    renderData(filtered);
+  const q = searchBox.value.toLowerCase();
+  render(!q ? ALL : ALL.filter(r => r.Description.toLowerCase().includes(q)));
 }
 
-function openModal(index = null) {
-    const modal = document.getElementById('dataModal');
-    const form = document.getElementById('crudForm');
-    if (index) {
-        const row = allRecords.find(r => String(r.HSN_Index) === String(index));
-        document.getElementById('modalTitle').innerText = "Edit HSN";
-        document.getElementById('formUniqueId').value = index;
-        document.getElementById('formAction').value = "update";
-        document.getElementById('formHsn').value = row.HSN;
-        document.getElementById('formDesc').value = row.Description;
-        document.getElementById('formRate').value = row.GST_Rate;
-        document.getElementById('formCess').value = row.Cess;
-    } else {
-        form.reset();
-        document.getElementById('modalTitle').innerText = "Add New HSN";
-        document.getElementById('formAction').value = "create";
-    }
-    modal.classList.replace('hidden', 'flex');
+function onHSNChange() {
+  gst.value = hsn.value && HSN_MAP[hsn.value] ? HSN_MAP[hsn.value] : '';
 }
 
-function closeModal() { document.getElementById('dataModal').classList.replace('flex', 'hidden'); }
-
-async function handleFormSubmit(e) {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    closeModal();
-    document.getElementById('loadingIndicator').classList.remove('hidden');
-    try {
-        await fetch(SCRIPT_URL, { method: 'POST', body: fd });
-        loadData();
-    } catch (err) { alert("Action Failed"); }
+/* ================= MODAL ================= */
+function openModal() {
+  modal.classList.replace('hidden', 'flex');
+  modalTitle.innerText = 'Add Item';
+  editCode.value = '';
+  desc.value = price.value = pack.value = qty.value = '';
+  hsn.value = '';
+  gst.value = '';
+  gos.value = 'Goods';
+  itc.value = 'No';
 }
 
-async function deleteRecord(index) {
-    if(!confirm("Delete this HSN record?")) return;
-    const fd = new FormData();
-    fd.set('action', 'delete');
-    fd.set('uniqueId', index);
-    await fetch(SCRIPT_URL, { method: 'POST', body: fd });
-    loadData();
+function closeModal() {
+  modal.classList.replace('flex', 'hidden');
 }
 
-function showStatus(msg, type) { 
-    const s = document.getElementById('statusMessage');
-    s.innerText = msg;
-    s.className = `mt-4 text-sm text-center ${type === 'error' ? 'text-red-600' : 'text-green-600'}`;
+function edit(r) {
+  openModal();
+  modalTitle.innerText = 'Edit Item';
+  editCode.value = r.ItemCode;
+  desc.value = r.Description;
+  hsn.value = r.HSN;
+  onHSNChange();
+  price.value = r.UnitPrice;
+  pack.value = r.Unit_Pack;
+  qty.value = r.InventoryQty;
+  gos.value = r.GoodsOrService;
+  itc.value = r.ITC;
 }
 
-window.onload = loadData;
+/* ================= SAVE / DELETE ================= */
+function save() {
+  if (!hsn.value) {
+    alert('Please select HSN');
+    return;
+  }
+
+  const data = {
+    Description: desc.value.trim(),
+    HSN: hsn.value,
+    UnitPrice: price.value,
+    Unit_Pack: pack.value.trim(),
+    GST_Rate: gst.value,
+    InventoryQty: qty.value || 0,
+    GoodsOrService: gos.value,
+    ITC: itc.value
+  };
+
+  const req = editCode.value
+    ? api('update', { data: { ...data, ItemCode: editCode.value } })
+    : api('create', { data });
+
+  req.then(() => { closeModal(); load(); });
+}
+
+function del(code) {
+  if (!confirm('Delete item?')) return;
+  api('delete', { code }).then(load);
+}
+
+/* ================= INIT ================= */
+function init() {
+  loadHSN();
+  load();
+}
+init();
 </script>
+
 </body>
 </html>
